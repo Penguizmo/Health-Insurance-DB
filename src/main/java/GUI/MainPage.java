@@ -3,40 +3,22 @@ package GUI;
 import javax.swing.*;
 
 public class MainPage extends JFrame {
-    /**
-     * The MainPage class represents the main GUI of the application.
-     * It contains the main frame and initializes the components.
-     */
+    private JPanel WelcomeInformation;
+    private JPanel ButtonOptions;
+    private JButton DoctorButton;
+    private JButton PatientButton;
+    private JButton DrugButton;
+    private JButton PrescriptionButton;
+    private JButton VisitButton;
+    private JButton InsuranceButton;
 
     public static void main(String[] args) {
-        // Create an instance of MainPage to display the GUI
-        SwingUtilities.invokeLater(() -> {
-            new MainPage();
-        });
-    }
-
-    private JFrame frame;
-    private JPanel MainPageJPanel;
-    private JPanel welcomeMesagePanel;
-    private JPanel DAOpageSelection;
-    private JButton doctorButton;
-    private JButton drugButton;
-    private JButton patientButton;
-    private JButton insuranceButton;
-    private JButton visitButton;
-    private JButton prescriptionButton;
-    private JPanel mainPageButtons;
-    private JTabbedPane tabbedPane1;
-
-    public MainPage() {
-        // Create the main frame
-        frame = new JFrame("The Home of Health Management");
+        JFrame frame = new JFrame("Main Page");
+        frame.setContentPane(new MainPage().WelcomeInformation);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(900, 600);
-        frame.setContentPane(MainPageJPanel);
+        frame.pack();
         frame.setVisible(true);
-
-        // Initilise the tabbed pane
-        tabbedPane1 = new JTabbedPane();
+        frame.setSize(1200, 600);
+        frame.setLocationRelativeTo(null); // Center the frame on the screen
     }
 }

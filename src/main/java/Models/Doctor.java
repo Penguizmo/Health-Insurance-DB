@@ -41,6 +41,9 @@ public class Doctor {
         this.hospital = hospital;
     }
 
+    public Doctor(String doctorid, String firstName, String surname, String address, String email, String hospital, String specialization, String experience) {
+    }
+
     /**
      * Getter method for doctorid.
      * This method returns the value of the doctorid field.

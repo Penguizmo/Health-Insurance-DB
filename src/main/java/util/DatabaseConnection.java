@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Properties;
+import java.sql.*;
 
 /**
  * The DatabaseConnection class provides a method to establish a connection to the database.
@@ -32,11 +32,12 @@ public class DatabaseConnection {
                 }
                 prop.load(input);
 
-                String url = "jdbc:mysql://localhost:3306/healthinsurancedb";
-                String user = "root";
-                String password = "root";
+                String url = prop.getProperty("db.url");
+                String user = prop.getProperty("db.user");
+                String password = prop.getProperty("db.password");
 
                 connection = DriverManager.getConnection(url, user, password);
+                System.out.println("Database connection established successfully."); // Test connection
             } catch (IOException | SQLException e) {
                 throw new RuntimeException("Error connecting to database", e);
             }

@@ -61,7 +61,6 @@ public class VisitDAO {
 
     /**
      * Retrieves a specific visit from the database using the composite primary key.
-     * The visit is uniquely identified by a combination of patientID, doctorID, and dateOfVisit.
      *
      * @param patientID The ID of the patient involved in the visit
      * @param doctorid The ID of the doctor conducting the visit
@@ -142,11 +141,11 @@ public class VisitDAO {
      */
     public int getPrimaryDoctorId(String patientID) throws SQLException {
         String sql = """
-                SELECT doctorid, COUNT(*) as visit_count 
-                FROM Visit 
-                WHERE patientID = ? 
-                GROUP BY doctorid 
-                ORDER BY visit_count DESC 
+                SELECT doctorid, COUNT(*) as visit_count
+                FROM Visit
+                WHERE patientID = ?
+                GROUP BY doctorid
+                ORDER BY visit_count DESC
                 LIMIT 1
                 """;
         try (Connection conn = DatabaseConnection.getConnection();

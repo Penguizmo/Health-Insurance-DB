@@ -194,4 +194,57 @@ public class PatientDAO {
             stmt.executeUpdate(); // Execute the query to delete the patient
         }
     }
+
+    /**
+     * Searches for patients in the database based on a search text
+     *
+     * @param searchText the text to search for in patient records
+     * @return a list of patients matching the search criteria
+     */
+
+    public List<Patient> searchPatients(String searchText) throws SQLException {
+        List<Patient> patients = new ArrayList<>();
+        String sql = "SELECT * FROM Patient WHERE firstname LIKE ? OR surname LIKE ? OR postcode LIKE ? OR address LIKE ? OR phone LIKE ? OR email LIKE ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            // Set the search text for each field in the SQL query
+            String searchPattern = "%" + searchText + "%";
+            for (int i = 1; i <= 6; i++) {
+                stmt.setString(i, searchPattern);
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                // Loop through the result set to process each row
+                while (rs.next()) {
+                    // Get the values for each column in the current row
+                    String patientID = rs.getString("patientID");
+                    String firstName = rs.getString("firstname");
+                    String surname = rs.getString("surname");
+                    String postcode = rs.getString("postcode");
+                    String address = rs.getString("address");
+                    String phone = rs.getString("phone");
+                    String email = rs.getString("email");
+                    String insuranceID = rs.getString("insuranceID");
+
+                    // Check if the patient has insurance
+                    // If yes, create an InsuredPatient object
+                    // If no, create a regular Patient object
+                    Patient patient;
+                    if (insuranceID != null) {
+                        patient = new InsuredPatient(patientID, firstName, surname, postcode, address, phone, email, insuranceID);
+                    } else {
+                        patient = new Patient(patientID, firstName, surname, postcode, address, phone, email);
+                    }
+
+                    // Add the patient to the list
+                    patients.add(patient);
+                }
+            }
+        }catch (SQLException e) {
+        e.printStackTrace(); // Print the stack trace for debugging}
+            throw e; // Rethrow the exception to be handled by the caller
+    }
+        return patients; // Return the list of matching patients
+    }
 }

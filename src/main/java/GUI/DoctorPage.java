@@ -14,12 +14,15 @@ import java.util.List;
 public class DoctorPage extends JFrame {
     private JPanel doctorPanel;
     private JLabel doctorLabel;
+    private JTable doctorTable;
+    private JScrollPane doctorScrollPane;
 
     // Buttons
     private JButton doctorUpdateButton;
     private JButton doctorDeleteButton;
     private JButton doctorAddButton;
     private JButton doctorReturnButton;
+    private JButton searchDoctorsButton;
 
     // Text Fields
     private JTextField txtDoctorID;
@@ -32,9 +35,6 @@ public class DoctorPage extends JFrame {
     private JTextField txtDoctorAddress;
     private JTextField txtDoctorSearchField;
 
-    private JTable doctorTable;
-    private JScrollPane doctorScrollPane;
-    private JButton searchDoctorsButton;
 
     private DoctorDAO doctorDAO = new DoctorDAO();
 

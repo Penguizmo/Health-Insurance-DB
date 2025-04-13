@@ -1,6 +1,6 @@
 package GUI;
 
-import java.awt.*;
+import javax.swing.*;
 
-public class DrugPage extends Component {
+public class DrugPage {
 }

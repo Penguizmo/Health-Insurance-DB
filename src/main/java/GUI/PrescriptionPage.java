@@ -11,7 +11,7 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 public class PrescriptionPage extends JFrame {
-    private JPanel prescriptionPanel;
+    public JPanel prescriptionPanel;
     private JLabel prescriptionLabel;
     private JTextField txtPrescriptionID;
     private JTextField txtDatePrescribed;
@@ -204,6 +204,24 @@ addPrescriptionButton.addActionListener(new ActionListener() {
         });
 
         populatePrescriptionTable();
+        prescriptionReturnButton.addActionListener(new ActionListener() {
+            /**
+             * Invoked when an action occurs.
+             *
+             * @param e the event to be processed
+             */
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Create and display the MainPage frame
+                JFrame mainPageFrame = new JFrame("Main Page");
+                mainPageFrame.setContentPane(new MainPage().mainPagePanel);
+                mainPageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Close only this frame
+                mainPageFrame.pack();
+                mainPageFrame.setVisible(true);
+                mainPageFrame.setSize(1200, 600); // Set the size of the frame
+
+            }
+        });
     }
 
     private void populatePrescriptionTable() {

@@ -12,7 +12,7 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 public class PatientPage extends JFrame {
-    private JPanel patientPanel;
+    public JPanel patientPanel;
     private JLabel patientLabel;
     private JTable patientTable;
     private JScrollPane patientScrollPane;
@@ -192,6 +192,24 @@ public class PatientPage extends JFrame {
         });
 
         populatePatientTable();
+        patientReturnButton.addActionListener(new ActionListener() {
+            /**
+             * Invoked when an action occurs.
+             *
+             * @param e the event to be processed
+             */
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Create and display the MainPage frame
+                JFrame mainPageFrame = new JFrame("Main Page");
+                mainPageFrame.setContentPane(new MainPage().mainPagePanel);
+                mainPageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Close only this frame
+                mainPageFrame.pack();
+                mainPageFrame.setVisible(true);
+                mainPageFrame.setSize(1200, 600); // Set the size of the frame
+
+            }
+        });
     }
 
     private void populatePatientTable() {

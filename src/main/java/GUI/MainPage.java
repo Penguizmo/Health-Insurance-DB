@@ -4,18 +4,18 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class MainPage extends JFrame {
-    private JPanel WelcomeInformation;
-    private JPanel ButtonOptions;
-    private JButton DoctorButton;
-    private JButton PatientButton;
-    private JButton DrugButton;
-    private JButton PrescriptionButton;
-    private JButton VisitButton;
-    private JButton InsuranceButton;
+public class MainPage {
+    private JButton doctorInformationButton;
+    private JButton drugInformationButton;
+    private JButton insuranceInformationButton;
+    private JButton patientInformationButton;
+    private JButton prescriptionInformationButton;
+    private JButton visitInformationButton;
+    private JPanel mainPagePanel;
+    private JPanel mainPageButtonPanel;
 
     public MainPage() {
-        DoctorButton.addActionListener(new ActionListener() {
+        doctorInformationButton.addActionListener(new ActionListener() {
             /**
              * Invoked when an action occurs.
              *
@@ -26,7 +26,7 @@ public class MainPage extends JFrame {
 
             }
         });
-        PatientButton.addActionListener(new ActionListener() {
+        drugInformationButton.addActionListener(new ActionListener() {
             /**
              * Invoked when an action occurs.
              *
@@ -37,7 +37,7 @@ public class MainPage extends JFrame {
 
             }
         });
-        DrugButton.addActionListener(new ActionListener() {
+        insuranceInformationButton.addActionListener(new ActionListener() {
             /**
              * Invoked when an action occurs.
              *
@@ -48,7 +48,7 @@ public class MainPage extends JFrame {
 
             }
         });
-        PrescriptionButton.addActionListener(new ActionListener() {
+        patientInformationButton.addActionListener(new ActionListener() {
             /**
              * Invoked when an action occurs.
              *
@@ -59,7 +59,7 @@ public class MainPage extends JFrame {
 
             }
         });
-        VisitButton.addActionListener(new ActionListener() {
+        prescriptionInformationButton.addActionListener(new ActionListener() {
             /**
              * Invoked when an action occurs.
              *
@@ -70,7 +70,7 @@ public class MainPage extends JFrame {
 
             }
         });
-        InsuranceButton.addActionListener(new ActionListener() {
+        visitInformationButton.addActionListener(new ActionListener() {
             /**
              * Invoked when an action occurs.
              *
@@ -82,14 +82,13 @@ public class MainPage extends JFrame {
             }
         });
     }
-
     public static void main(String[] args) {
         JFrame frame = new JFrame("Main Page");
-        frame.setContentPane(new MainPage().WelcomeInformation);
+        frame.setContentPane(new MainPage().mainPagePanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-        frame.setSize(1200, 600);
-        frame.setLocationRelativeTo(null); // Center the frame on the screen
+        frame.setSize(600, 400);
+
     }
 }

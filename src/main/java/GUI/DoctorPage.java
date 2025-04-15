@@ -39,6 +39,22 @@ public class DoctorPage extends JFrame {
     private DoctorDAO doctorDAO = new DoctorDAO();
 
     public DoctorPage() {
+        setTitle("Doctor Information");
+        setSize(1200, 600);
+        setLocationRelativeTo(null);
+        setContentPane(doctorPanel);
+        setVisible(true);
+        setResizable(false);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        //Add components specific to the doctor page
+        doctorUpdateButton = new JButton("Update");
+        doctorDeleteButton = new JButton("Delete");
+        doctorAddButton = new JButton("Add");
+        doctorReturnButton = new JButton("Return");
+        searchDoctorsButton = new JButton("Search");
+
+
         doctorUpdateButton.addActionListener(new ActionListener() {
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -258,14 +274,5 @@ public class DoctorPage extends JFrame {
                 return null;
             }
         }.execute();
-    }
-
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("DoctorPage");
-        frame.setContentPane(new DoctorPage().doctorPanel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setVisible(true);
-        frame.setSize(1200, 600);
     }
 }

@@ -40,42 +40,45 @@ public class DoctorPage extends JFrame {
 
     public DoctorPage() {
         doctorUpdateButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    int doctorID = Integer.parseInt(txtDoctorID.getText());
-                    Doctor doctor = doctorDAO.getDoctorById(doctorID);
-
-                    if (doctor != null) {
-                        txtDoctorID.setText(String.valueOf(doctor.getDoctorId()));
-                        txtDoctorFname.setText(doctor.getFirstName());
-                        txtDoctorSname.setText(doctor.getSurname());
-                        txtDoctorAddress.setText(doctor.getAddress());
-                        txtDoctorEmail.setText(doctor.getEmail());
-                        txtDoctorHospital.setText(doctor.getHospital());
-
-                        if (doctor instanceof Specialist) {
-                            txtDoctorSpecialization.setText(((Specialist) doctor).getSpecialization());
-                            txtDoctorExp.setText(((Specialist) doctor).getExperience());
-                            txtDoctorSpecialization.setEditable(true);
-                            txtDoctorExp.setEditable(true);
-                        } else {
-                            txtDoctorSpecialization.setText("");
-                            txtDoctorExp.setText("");
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Doctor not found");
-                    }
-
-                    populateDoctorTable();
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(null, "Invalid Doctor ID: " + ex.getMessage());
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(null, "Error fetching doctor information: " + ex.getMessage());
-                }
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        try {
+            String doctorIDText = txtDoctorID.getText();
+            if (doctorIDText.isEmpty() || !doctorIDText.matches("\\d+")) {
+                JOptionPane.showMessageDialog(null, "Please enter a valid numeric Doctor ID.");
+                return;
             }
-        });
+            int doctorID = Integer.parseInt(doctorIDText);
+            String firstName = txtDoctorFname.getText();
+            String surname = txtDoctorSname.getText();
+            String address = txtDoctorAddress.getText();
+            String email = txtDoctorEmail.getText();
+            String hospital = txtDoctorHospital.getText();
+            String specialization = txtDoctorSpecialization.getText();
+            String experience = txtDoctorExp.getText();
 
+            if (firstName.isEmpty() || surname.isEmpty() || address.isEmpty() || email.isEmpty() || hospital.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Please fill in all required fields.");
+                return;
+            }
+
+            Doctor doctor;
+            if (!specialization.isEmpty() && !experience.isEmpty()) {
+                doctor = new Specialist(doctorID, firstName, surname, address, email, hospital, specialization, experience);
+            } else {
+                doctor = new Doctor(doctorID, firstName, surname, address, email, hospital);
+            }
+
+            doctorDAO.updateDoctor(doctor);
+            JOptionPane.showMessageDialog(null, "Doctor updated successfully");
+            populateDoctorTable();
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(null, "Invalid Doctor ID: " + ex.getMessage());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Error updating doctor: " + ex.getMessage());
+        }
+    }
+});
         doctorAddButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

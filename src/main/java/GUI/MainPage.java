@@ -82,13 +82,4 @@ public class MainPage {
             }
         });
     }
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("Main Page");
-        frame.setContentPane(new MainPage().mainPagePanel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setVisible(true);
-        frame.setSize(600, 400);
-
-    }
 }

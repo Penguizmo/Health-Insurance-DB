@@ -97,6 +97,54 @@ public class InsurancePage extends JFrame {
         });
 
         populateInsuranceTable();
+        updateInsuranceButton.addActionListener(new ActionListener() {
+            /**
+             * Invoked when an action occurs.
+             *
+             * @param e the event to be processed
+             */
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String insuranceID = txtInsuranceID.getText();
+                    String companyName = txtCompanyName.getText();
+                    String companyAddress = txtCompanyAddress.getText();
+                    String companyPhoneNo = txtCompanyPhoneNo.getText();
+
+                    Insurance insurance = new Insurance(insuranceID, companyName, companyAddress, companyPhoneNo);
+                    insuranceDAO.updateInsurance(insurance);
+                    JOptionPane.showMessageDialog(null, "Insurance updated successfully");
+                    populateInsuranceTable();
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Error updating insurance: " + ex.getMessage());
+                }
+
+            }
+        });
+        addInsuranceDetailsButton.addActionListener(new ActionListener() {
+            /**
+             * Invoked when an action occurs.
+             *
+             * @param e the event to be processed
+             */
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String insuranceID = txtInsuranceID.getText();
+                    String companyName = txtCompanyName.getText();
+                    String companyAddress = txtCompanyAddress.getText();
+                    String companyPhoneNo = txtCompanyPhoneNo.getText();
+
+                    Insurance insurance = new Insurance(insuranceID, companyName, companyAddress, companyPhoneNo);
+                    insuranceDAO.addInsurance(insurance);
+                    JOptionPane.showMessageDialog(null, "Insurance added successfully");
+                    populateInsuranceTable();
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Error adding insurance: " + ex.getMessage());
+                }
+
+            }
+        });
     }
 
     private void populateInsuranceTable() {

@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * The PrescriptionDAO class provides methods to interact with the Prescription table in the database.
- * It includes methods to add, retrieve, update, and delete prescription information.
+ * It includes methods to add, retrieve, update, delete, and search prescription information.
  */
 public class PrescriptionDAO {
 
@@ -20,20 +20,17 @@ public class PrescriptionDAO {
      * @throws SQLException if a database access error occurs
      */
     public void addPrescription(Prescription prescription) throws SQLException {
-        // SQL query to insert a new prescription into the Prescription table
         String sql = "INSERT INTO Prescription (prescriptionid, dateprescribed, dosage, duration, comment, drugid, doctorid, patientID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            // Set the values for the prescription fields in the SQL query
-            stmt.setInt(1, prescription.getPrescriptionId());
+            stmt.setLong(1, prescription.getPrescriptionId());
             stmt.setDate(2, new java.sql.Date(prescription.getDatePrescribed().getTime()));
             stmt.setString(3, prescription.getDosage());
             stmt.setString(4, prescription.getDuration());
             stmt.setString(5, prescription.getComment());
-            stmt.setInt(6, prescription.getDrugId());
-            stmt.setInt(7, prescription.getDoctorId());
+            stmt.setLong(6, prescription.getDrugId());
+            stmt.setLong(7, prescription.getDoctorId());
             stmt.setString(8, prescription.getPatientID());
-            // Execute the query to add the prescription to the database
             stmt.executeUpdate();
         }
     }
@@ -46,27 +43,15 @@ public class PrescriptionDAO {
      */
     public List<Prescription> getAllPrescriptions() throws SQLException {
         List<Prescription> prescriptions = new ArrayList<>();
-        // SQL query to select all prescriptions, ordered by date
         String sql = "SELECT * FROM Prescription ORDER BY dateprescribed DESC";
         try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            // Loop through the result set to process each row
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
-                // Create a Prescription object using the data from the current row
-                prescriptions.add(new Prescription(
-                        rs.getInt("prescriptionid"),
-                        rs.getDate("dateprescribed"),
-                        rs.getString("dosage"),
-                        rs.getString("duration"),
-                        rs.getString("comment"),
-                        rs.getInt("drugid"),
-                        rs.getInt("doctorid"),
-                        rs.getString("patientID")
-                ));
+                prescriptions.add(mapResultSetToPrescription(rs));
             }
         }
-        return prescriptions; // Return the list of prescriptions
+        return prescriptions;
     }
 
     /**
@@ -76,31 +61,18 @@ public class PrescriptionDAO {
      * @return the prescription object if found, or null if no prescription exists with the given ID
      * @throws SQLException if a database access error occurs
      */
-    public Prescription getPrescriptionById(int prescriptionid) throws SQLException {
-        // SQL query to select a prescription by its ID
+    public Prescription getPrescriptionById(long prescriptionid) throws SQLException {
         String sql = "SELECT * FROM Prescription WHERE prescriptionid = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            // Set the prescription ID in the query
-            stmt.setInt(1, prescriptionid);
+            stmt.setLong(1, prescriptionid);
             try (ResultSet rs = stmt.executeQuery()) {
-                // Check if a row is returned
                 if (rs.next()) {
-                    // Create and return a Prescription object using the data from the row
-                    return new Prescription(
-                            rs.getInt("prescriptionid"),
-                            rs.getDate("dateprescribed"),
-                            rs.getString("dosage"),
-                            rs.getString("duration"),
-                            rs.getString("comment"),
-                            rs.getInt("drugid"),
-                            rs.getInt("doctorid"),
-                            rs.getString("patientID")
-                    );
+                    return mapResultSetToPrescription(rs);
                 }
             }
         }
-        return null; // Return null if no prescription is found
+        return null;
     }
 
     /**
@@ -110,20 +82,17 @@ public class PrescriptionDAO {
      * @throws SQLException if a database access error occurs
      */
     public void updatePrescription(Prescription prescription) throws SQLException {
-        // SQL query to update a prescription's details in the Prescription table
         String sql = "UPDATE Prescription SET dateprescribed = ?, dosage = ?, duration = ?, comment = ?, drugid = ?, doctorid = ?, patientID = ? WHERE prescriptionid = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            // Set the updated values for the prescription fields in the SQL query
             stmt.setDate(1, new java.sql.Date(prescription.getDatePrescribed().getTime()));
             stmt.setString(2, prescription.getDosage());
             stmt.setString(3, prescription.getDuration());
             stmt.setString(4, prescription.getComment());
-            stmt.setInt(5, prescription.getDrugId());
-            stmt.setInt(6, prescription.getDoctorId());
+            stmt.setLong(5, prescription.getDrugId());
+            stmt.setLong(6, prescription.getDoctorId());
             stmt.setString(7, prescription.getPatientID());
-            stmt.setInt(8, prescription.getPrescriptionId());
-            // Execute the query to update the prescription in the database
+            stmt.setLong(8, prescription.getPrescriptionId());
             stmt.executeUpdate();
         }
     }
@@ -134,15 +103,58 @@ public class PrescriptionDAO {
      * @param prescriptionId the ID of the prescription to delete
      * @throws SQLException if a database access error occurs
      */
-    public void deletePrescription(int prescriptionId) throws SQLException {
-        // SQL query to delete a prescription by its ID
+    public void deletePrescription(long prescriptionId) throws SQLException {
         String sql = "DELETE FROM Prescription WHERE prescriptionid = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            // Set the prescription ID in the query
-            stmt.setInt(1, prescriptionId);
-            // Execute the query to delete the prescription from the database
+            stmt.setLong(1, prescriptionId);
             stmt.executeUpdate();
         }
+    }
+
+    /**
+     * Searches for prescriptions in the database based on the search text.
+     * The search is performed on prescriptionid, patientID, and comment fields.
+     *
+     * @param searchText the text to search for
+     * @return a list of prescriptions matching the search criteria
+     * @throws SQLException if a database access error occurs
+     */
+    public List<Prescription> searchPrescriptions(String searchText) throws SQLException {
+        List<Prescription> prescriptions = new ArrayList<>();
+        String sql = "SELECT * FROM Prescription WHERE CAST(prescriptionid AS CHAR) LIKE ? OR patientID LIKE ? OR comment LIKE ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            String searchPattern = "%" + searchText + "%";
+            stmt.setString(1, searchPattern);
+            stmt.setString(2, searchPattern);
+            stmt.setString(3, searchPattern);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    prescriptions.add(mapResultSetToPrescription(rs));
+                }
+            }
+        }
+        return prescriptions;
+    }
+
+    /**
+     * Maps a ResultSet row to a Prescription object.
+     *
+     * @param rs the ResultSet containing prescription data
+     * @return a Prescription object
+     * @throws SQLException if a database access error occurs
+     */
+    private Prescription mapResultSetToPrescription(ResultSet rs) throws SQLException {
+        return new Prescription(
+                rs.getLong("prescriptionid"),
+                rs.getDate("dateprescribed"),
+                rs.getString("dosage"),
+                rs.getString("duration"),
+                rs.getString("comment"),
+                rs.getLong("drugid"),
+                rs.getLong("doctorid"),
+                rs.getString("patientID")
+        );
     }
 }

@@ -33,6 +33,21 @@ public class VisitDAO {
         }
     }
 
+    public boolean isPatientIDValid(String patientID) {
+        String query = "SELECT COUNT(*) FROM Patient WHERE PatientID = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, patientID);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     /**
      * Retrieves all visit records from the database.
      *

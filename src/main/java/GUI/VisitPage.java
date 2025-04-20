@@ -27,6 +27,7 @@ public class VisitPage extends JFrame {
     private JButton searchVisitRecordsButton;
     private JTextField txtVisitSearchField;
     private JScrollPane visitScrollPane;
+    private JButton visitClearFieldsButton;
 
     private VisitDAO visitDAO = new VisitDAO();
 
@@ -177,6 +178,22 @@ public class VisitPage extends JFrame {
                 mainPageFrame.setVisible(true);
                 mainPageFrame.setSize(1200, 600); // Set the size of the frame
 
+            }
+        });
+        visitClearFieldsButton.addActionListener(new ActionListener() {
+            /**
+             * Invoked when an action occurs.
+             *
+             * @param e the event to be processed
+             */
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Clear all text fields
+                txtPatientID.setText("");
+                txtDoctorID.setText("");
+                txtDateOfVisit.setText("");
+                txtSymptoms.setText("");
+                txtDiagnosisID.setText("");
             }
         });
     }

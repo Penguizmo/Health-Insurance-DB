@@ -29,6 +29,7 @@ public class PrescriptionPage extends JFrame {
     private JButton searchPrescriptionsButton;
     private JTextField txtPrescriptionSearchField;
     private JScrollPane prescriptionScrollPane;
+    private JButton prescriptionClearFieldsButton;
 
     private PrescriptionDAO prescriptionDAO = new PrescriptionDAO();
 
@@ -220,6 +221,25 @@ addPrescriptionButton.addActionListener(new ActionListener() {
                 mainPageFrame.setVisible(true);
                 mainPageFrame.setSize(1200, 600); // Set the size of the frame
 
+            }
+        });
+        prescriptionClearFieldsButton.addActionListener(new ActionListener() {
+            /**
+             * Invoked when an action occurs.
+             *
+             * @param e the event to be processed
+             */
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Clear all text fields
+                txtPrescriptionID.setText("");
+                txtDatePrescribed.setText("");
+                txtDosage.setText("");
+                txtDuration.setText("");
+                txtComment.setText("");
+                txtDrugID.setText("");
+                txtDoctorID.setText("");
+                txtPatientID.setText("");
             }
         });
     }

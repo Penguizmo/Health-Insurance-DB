@@ -27,6 +27,7 @@ public class DrugPage extends JFrame {
     private JButton deleteDrugButton;
     private JButton drugReturnButton;
     private JButton searchDrugButton;
+    private JButton drugClearFieldsButton;
 
     private DrugDAO drugDAO = new DrugDAO();
 
@@ -166,6 +167,22 @@ public class DrugPage extends JFrame {
                 mainPageFrame.setVisible(true);
                 mainPageFrame.setSize(1200, 600); // Set the size of the frame
 
+            }
+        });
+        drugClearFieldsButton.addActionListener(new ActionListener() {
+            /**
+             * Invoked when an action occurs.
+             *
+             * @param e the event to be processed
+             */
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Clear all text fields
+                txtDrugID.setText("");
+                txtDrugName.setText("");
+                txtSideEffect.setText("");
+                txtBenefit.setText("");
+                txtDrugSearchField.setText("");
             }
         });
     }

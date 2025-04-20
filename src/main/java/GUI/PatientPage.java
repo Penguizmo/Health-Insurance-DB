@@ -32,6 +32,7 @@ public class PatientPage extends JFrame {
     private JButton deletePatientButton;
     private JButton patientReturnButton;
     private JButton searchPatientsButton;
+    private JButton patientClearFieldsButton;
 
     private PatientDAO patientDAO = new PatientDAO();
 
@@ -208,6 +209,25 @@ public class PatientPage extends JFrame {
                 mainPageFrame.setVisible(true);
                 mainPageFrame.setSize(1200, 600); // Set the size of the frame
 
+            }
+        });
+        patientClearFieldsButton.addActionListener(new ActionListener() {
+            /**
+             * Invoked when an action occurs.
+             *
+             * @param e the event to be processed
+             */
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Clear all text fields
+                txtPatientID.setText("");
+                txtPatientFirstName.setText("");
+                txtPatientSurname.setText("");
+                txtPatientPostCode.setText("");
+                txtPatientAddress.setText("");
+                txtPatientPhoneNo.setText("");
+                txtPatientEmail.setText("");
+                txtPatientInsuranceID.setText("");
             }
         });
     }

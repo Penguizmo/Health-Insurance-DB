@@ -27,6 +27,7 @@ public class InsurancePage extends JFrame {
     private JButton deleteInsuranceDetailsButton;
     private JButton insuranceReturnButton;
     private JButton searchInsuranceButton;
+    private JButton insuranceClearFieldsButton;
 
     private InsuranceDAO insuranceDAO = new InsuranceDAO();
 
@@ -161,6 +162,25 @@ public class InsurancePage extends JFrame {
                 mainPageFrame.setVisible(true);
                 mainPageFrame.setSize(1200, 600); // Set the size of the frame
 
+            }
+        });
+        insuranceClearFieldsButton.addActionListener(new ActionListener() {
+            /**
+             * Invoked when an action occurs.
+             *
+             * @param e the event to be processed
+             */
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Clear all text fields
+                txtInsuranceID.setText("");
+                txtCompanyName.setText("");
+                txtCompanyAddress.setText("");
+                txtCompanyPhoneNo.setText("");
+                txtInsuranceSearchField.setText("");
+
+                // Clear the selection in the table
+                insuranceTable.clearSelection();
             }
         });
     }

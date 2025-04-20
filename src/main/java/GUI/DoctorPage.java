@@ -34,6 +34,7 @@ public class DoctorPage extends JFrame {
     private JTextField txtDoctorExp;
     private JTextField txtDoctorAddress;
     private JTextField txtDoctorSearchField;
+    private JButton doctorClearFieldsButton;
 
 
     private DoctorDAO doctorDAO = new DoctorDAO();
@@ -238,6 +239,20 @@ public class DoctorPage extends JFrame {
                 mainPageFrame.setVisible(true);
                 mainPageFrame.setSize(1200, 600); // Set the size of the frame
 
+            }
+        });
+        doctorClearFieldsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                txtDoctorID.setText("");
+                txtDoctorFname.setText("");
+                txtDoctorSname.setText("");
+                txtDoctorAddress.setText("");
+                txtDoctorEmail.setText("");
+                txtDoctorHospital.setText("");
+                txtDoctorSpecialization.setText("");
+                txtDoctorExp.setText("");
+                txtDoctorSearchField.setText("");
             }
         });
     }

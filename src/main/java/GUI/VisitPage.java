@@ -9,9 +9,14 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class VisitPage extends JFrame {
+    private static final Logger LOGGER = Logger.getLogger(VisitPage.class.getName());
+
     public JPanel visitPanel;
     private JLabel visitLabel;
     private JTextField txtPatientID;
@@ -53,8 +58,15 @@ public class VisitPage extends JFrame {
                     } else {
                         JOptionPane.showMessageDialog(null, "Visit record not found.");
                     }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Invalid Doctor ID. Please enter a valid number.");
+                    LOGGER.log(Level.SEVERE, "Invalid Doctor ID input", ex);
+                } catch (DateTimeParseException ex) {
+                    JOptionPane.showMessageDialog(null, "Invalid Date format. Please use YYYY-MM-DD.");
+                    LOGGER.log(Level.SEVERE, "Invalid Date input", ex);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "Error updating visit record: " + ex.getMessage());
+                    LOGGER.log(Level.SEVERE, "Error updating visit record", ex);
                 }
             }
         });
@@ -75,12 +87,31 @@ public class VisitPage extends JFrame {
                         return;
                     }
 
+                    // Validate PatientID
+                    if (!visitDAO.isPatientIDValid(patientID)) {
+                        JOptionPane.showMessageDialog(null, "Invalid Patient ID. Please ensure the patient exists.");
+                        return;
+                    }
+
+                    // Validate DoctorID
+                    if (!visitDAO.isDoctorIDValid(doctorID)) {
+                        JOptionPane.showMessageDialog(null, "Invalid Doctor ID. Please ensure the doctor exists.");
+                        return;
+                    }
+
                     Visit visit = new Visit(patientID, doctorID, dateOfVisit, symptoms, diagnosisID);
                     visitDAO.addVisit(visit);
                     JOptionPane.showMessageDialog(null, "Visit record added successfully.");
                     populateVisitTable();
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Invalid Doctor ID. Please enter a valid number.");
+                    LOGGER.log(Level.SEVERE, "Invalid Doctor ID input", ex);
+                } catch (DateTimeParseException ex) {
+                    JOptionPane.showMessageDialog(null, "Invalid Date format. Please use YYYY-MM-DD.");
+                    LOGGER.log(Level.SEVERE, "Invalid Date input", ex);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "Error adding visit record: " + ex.getMessage());
+                    LOGGER.log(Level.SEVERE, "Error adding visit record", ex);
                 }
             }
         });
@@ -97,18 +128,16 @@ public class VisitPage extends JFrame {
                     visitDAO.deleteVisit(patientID, doctorID, dateOfVisit);
                     JOptionPane.showMessageDialog(null, "Visit record deleted successfully.");
                     populateVisitTable();
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Invalid Doctor ID. Please enter a valid number.");
+                    LOGGER.log(Level.SEVERE, "Invalid Doctor ID input", ex);
+                } catch (DateTimeParseException ex) {
+                    JOptionPane.showMessageDialog(null, "Invalid Date format. Please use YYYY-MM-DD.");
+                    LOGGER.log(Level.SEVERE, "Invalid Date input", ex);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "Error deleting visit record: " + ex.getMessage());
+                    LOGGER.log(Level.SEVERE, "Error deleting visit record", ex);
                 }
-            }
-        });
-
-        // Listener for returning to the main page
-        visitReturnButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispose(); // Close the current window
-                // Logic to return to the main page can be added here
             }
         });
 
@@ -141,6 +170,7 @@ public class VisitPage extends JFrame {
                     visitScrollPane.setViewportView(visitTable);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "Error searching visit records: " + ex.getMessage());
+                    LOGGER.log(Level.SEVERE, "Error searching visit records", ex);
                 }
             }
         });
@@ -162,30 +192,7 @@ public class VisitPage extends JFrame {
         });
 
         populateVisitTable();
-        visitReturnButton.addActionListener(new ActionListener() {
-            /**
-             * Invoked when an action occurs.
-             *
-             * @param e the event to be processed
-             */
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Create and display the MainPage frame
-                JFrame mainPageFrame = new JFrame("Main Page");
-                mainPageFrame.setContentPane(new MainPage().mainPagePanel);
-                mainPageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Close only this frame
-                mainPageFrame.pack();
-                mainPageFrame.setVisible(true);
-                mainPageFrame.setSize(1200, 600); // Set the size of the frame
-
-            }
-        });
         visitClearFieldsButton.addActionListener(new ActionListener() {
-            /**
-             * Invoked when an action occurs.
-             *
-             * @param e the event to be processed
-             */
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Clear all text fields
@@ -194,6 +201,30 @@ public class VisitPage extends JFrame {
                 txtDateOfVisit.setText("");
                 txtSymptoms.setText("");
                 txtDiagnosisID.setText("");
+            }
+        });
+        visitReturnButton.addActionListener(new ActionListener() {
+            /**
+             * Invoked when an action occurs.
+             *
+             * @param e the event to be processed
+             */
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // close the current frame
+                JFrame currentFrame = (JFrame) SwingUtilities.getWindowAncestor(visitPanel);
+                if (currentFrame != null) {
+                    currentFrame.dispose();
+                }
+
+                // Open the MainPage
+                JFrame mainFrame = new JFrame("MainPage");
+                mainFrame.setContentPane(new MainPage().mainPagePanel);
+                mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                mainFrame.pack();
+                mainFrame.setVisible(true);
+                mainFrame.setSize(800, 600);
+
             }
         });
     }
@@ -220,6 +251,7 @@ public class VisitPage extends JFrame {
                     visitScrollPane.setViewportView(visitTable);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "Error populating visit table: " + ex.getMessage());
+                    LOGGER.log(Level.SEVERE, "Error populating visit table", ex);
                 }
                 return null;
             }

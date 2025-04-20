@@ -172,4 +172,19 @@ public class VisitDAO {
                 rs.getString("diagnosisID")
         );
     }
+
+    public boolean isDoctorIDValid(int doctorID) {
+        String query = "SELECT COUNT(*) FROM Doctor WHERE DoctorID = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, doctorID);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

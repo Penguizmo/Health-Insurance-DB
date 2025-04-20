@@ -8,7 +8,10 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.sql.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class PrescriptionPage extends JFrame {
     public JPanel prescriptionPanel;
@@ -34,127 +37,142 @@ public class PrescriptionPage extends JFrame {
     private PrescriptionDAO prescriptionDAO = new PrescriptionDAO();
 
     public PrescriptionPage() {
-        // Listener for updating a prescription
+        if (prescriptionDAO == null) {
+            JOptionPane.showMessageDialog(null, "Error: PrescriptionDAO is not initialized.");
+            return;
+        }
+
         updatePrescriptionButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
+                    if (txtPrescriptionID.getText().isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Prescription ID is required.");
+                        return;
+                    }
+
                     long prescriptionID = Long.parseLong(txtPrescriptionID.getText());
                     Prescription prescription = prescriptionDAO.getPrescriptionById(prescriptionID);
 
-                    if (prescription != null) {
-                        prescription.setDatePrescribed(java.sql.Date.valueOf(txtDatePrescribed.getText()));
-                        prescription.setDosage(txtDosage.getText());
-                        prescription.setDuration(txtDuration.getText());
-                        prescription.setComment(txtComment.getText());
+                    if (prescription == null) {
+                        JOptionPane.showMessageDialog(null, "Prescription not found.");
+                        return;
+                    }
+
+                    try {
+                        prescription.setDatePrescribed(Date.valueOf(txtDatePrescribed.getText()));
+                    } catch (IllegalArgumentException ex) {
+                        JOptionPane.showMessageDialog(null, "Invalid date format. Use yyyy-MM-dd.");
+                        return;
+                    }
+
+                    prescription.setDosage(txtDosage.getText().trim());
+                    prescription.setDuration(txtDuration.getText().trim());
+                    prescription.setComment(txtComment.getText().trim());
+
+                    try {
                         prescription.setDrugId(Long.parseLong(txtDrugID.getText()));
                         prescription.setDoctorId(Long.parseLong(txtDoctorID.getText()));
-                        prescription.setPatientID(txtPatientID.getText());
-
-                        prescriptionDAO.updatePrescription(prescription);
-                        JOptionPane.showMessageDialog(null, "Prescription updated successfully.");
-                        populatePrescriptionTable();
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Prescription not found.");
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(null, "Drug ID and Doctor ID must be numeric.");
+                        return;
                     }
+
+                    prescription.setPatientID(txtPatientID.getText().trim());
+
+                    prescriptionDAO.updatePrescription(prescription);
+                    JOptionPane.showMessageDialog(null, "Prescription updated successfully.");
+                    populatePrescriptionTable();
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Prescription ID must be numeric.");
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "Error updating prescription: " + ex.getMessage());
                 }
             }
         });
 
-        // Listener for adding a prescription
-addPrescriptionButton.addActionListener(new ActionListener() {
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        try {
-            // Validate Prescription ID
-            if (txtPrescriptionID.getText().isEmpty() || !txtPrescriptionID.getText().matches("\\d+")) {
-                JOptionPane.showMessageDialog(null, "Please enter a valid numeric Prescription ID.");
-                return;
+        addPrescriptionButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    if (txtPrescriptionID.getText().isEmpty() || txtDatePrescribed.getText().isEmpty() ||
+                        txtDosage.getText().isEmpty() || txtDuration.getText().isEmpty() ||
+                        txtDrugID.getText().isEmpty() || txtDoctorID.getText().isEmpty() ||
+                        txtPatientID.getText().isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "All fields are required.");
+                        return;
+                    }
+
+                    long prescriptionID = Long.parseLong(txtPrescriptionID.getText());
+                    Date datePrescribed = Date.valueOf(txtDatePrescribed.getText());
+                    String dosage = txtDosage.getText().trim();
+                    String duration = txtDuration.getText().trim();
+                    String comment = txtComment.getText().trim();
+                    long drugID = Long.parseLong(txtDrugID.getText());
+                    long doctorID = Long.parseLong(txtDoctorID.getText());
+                    String patientID = txtPatientID.getText().trim();
+
+                    // Validate foreign key values
+                    if (!prescriptionDAO.isDrugIdValid(drugID)) {
+                        JOptionPane.showMessageDialog(null, "Invalid Drug ID. Please ensure the Drug ID exists.");
+                        return;
+                    }
+                    if (!prescriptionDAO.isDoctorIdValid(doctorID)) {
+                        JOptionPane.showMessageDialog(null, "Invalid Doctor ID. Please ensure the Doctor ID exists.");
+                        return;
+                    }
+                    if (!prescriptionDAO.isPatientIdValid(patientID)) {
+                        JOptionPane.showMessageDialog(null, "Invalid Patient ID. Please ensure the Patient ID exists.");
+                        return;
+                    }
+
+                    Prescription prescription = new Prescription(prescriptionID, datePrescribed, dosage, duration, comment, drugID, doctorID, patientID);
+                    prescriptionDAO.addPrescription(prescription);
+                    JOptionPane.showMessageDialog(null, "Prescription added successfully.");
+                    populatePrescriptionTable();
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Prescription ID, Drug ID, and Doctor ID must be numeric.");
+                } catch (IllegalArgumentException ex) {
+                    JOptionPane.showMessageDialog(null, "Invalid date format. Use yyyy-MM-dd.");
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Error adding prescription: " + ex.getMessage());
+                }
             }
-            long prescriptionID = Long.parseLong(txtPrescriptionID.getText());
+        });
 
-            // Validate Date Prescribed
-            if (txtDatePrescribed.getText().isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Please enter a valid date (yyyy-MM-dd).");
-                return;
-            }
-            java.sql.Date datePrescribed = java.sql.Date.valueOf(txtDatePrescribed.getText());
-
-            // Validate other fields
-            String dosage = txtDosage.getText();
-            String duration = txtDuration.getText();
-            String comment = txtComment.getText();
-            if (dosage.isEmpty() || duration.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Dosage and Duration cannot be empty.");
-                return;
-            }
-
-            // Validate Drug ID, Doctor ID, and Patient ID
-            if (txtDrugID.getText().isEmpty() || !txtDrugID.getText().matches("\\d+")) {
-                JOptionPane.showMessageDialog(null, "Please enter a valid numeric Drug ID.");
-                return;
-            }
-            long drugID = Long.parseLong(txtDrugID.getText());
-
-            if (txtDoctorID.getText().isEmpty() || !txtDoctorID.getText().matches("\\d+")) {
-                JOptionPane.showMessageDialog(null, "Please enter a valid numeric Doctor ID.");
-                return;
-            }
-            long doctorID = Long.parseLong(txtDoctorID.getText());
-
-            String patientID = txtPatientID.getText();
-            if (patientID.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Patient ID cannot be empty.");
-                return;
-            }
-
-            // Create Prescription object
-            Prescription prescription = new Prescription(prescriptionID, datePrescribed, dosage, duration, comment, drugID, doctorID, patientID);
-
-            // Add Prescription to the database
-            prescriptionDAO.addPrescription(prescription);
-            JOptionPane.showMessageDialog(null, "Prescription added successfully.");
-            populatePrescriptionTable(); // Refresh the table
-        } catch (IllegalArgumentException ex) {
-            JOptionPane.showMessageDialog(null, "Invalid date format. Please use yyyy-MM-dd.");
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "Error adding prescription: " + ex.getMessage());
-        }
-    }
-});
-
-        // Listener for deleting a prescription
         deletePrescriptionButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
+                    if (txtPrescriptionID.getText().isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Prescription ID is required.");
+                        return;
+                    }
+
                     long prescriptionID = Long.parseLong(txtPrescriptionID.getText());
                     prescriptionDAO.deletePrescription(prescriptionID);
                     JOptionPane.showMessageDialog(null, "Prescription deleted successfully.");
                     populatePrescriptionTable();
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Prescription ID must be numeric.");
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "Error deleting prescription: " + ex.getMessage());
                 }
             }
         });
 
-        // Listener for returning to the main page
-        prescriptionReturnButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispose(); // Close the current window
-                // Logic to return to the main page can be added here
-            }
-        });
-
-        // Listener for searching prescriptions
         searchPrescriptionsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    String searchText = txtPrescriptionSearchField.getText();
+                    String searchText = txtPrescriptionSearchField.getText().trim();
+                    if (searchText.isEmpty()) {
+                        // If the search field is empty, display all prescriptions
+                        populatePrescriptionTable();
+                        return;
+                    }
+
+                    // Perform search if searchText is not empty
                     List<Prescription> prescriptions = prescriptionDAO.searchPrescriptions(searchText);
                     String[] columnNames = {"Prescription ID", "Date Prescribed", "Dosage", "Duration", "Comment", "Drug ID", "Doctor ID", "Patient ID"};
 
@@ -185,13 +203,11 @@ addPrescriptionButton.addActionListener(new ActionListener() {
             }
         });
 
-        // Add ListSelectionListener to the PrescriptionTable
         PrescriptionTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                if (!e.getValueIsAdjusting() && PrescriptionTable.getSelectedRow() != -1) {
+                if (PrescriptionTable.getSelectedRow() != -1) {
                     int selectedRow = PrescriptionTable.getSelectedRow();
-
                     txtPrescriptionID.setText(PrescriptionTable.getValueAt(selectedRow, 0).toString());
                     txtDatePrescribed.setText(PrescriptionTable.getValueAt(selectedRow, 1).toString());
                     txtDosage.setText(PrescriptionTable.getValueAt(selectedRow, 2).toString());
@@ -204,34 +220,11 @@ addPrescriptionButton.addActionListener(new ActionListener() {
             }
         });
 
-        populatePrescriptionTable();
-        prescriptionReturnButton.addActionListener(new ActionListener() {
-            /**
-             * Invoked when an action occurs.
-             *
-             * @param e the event to be processed
-             */
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Create and display the MainPage frame
-                JFrame mainPageFrame = new JFrame("Main Page");
-                mainPageFrame.setContentPane(new MainPage().mainPagePanel);
-                mainPageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Close only this frame
-                mainPageFrame.pack();
-                mainPageFrame.setVisible(true);
-                mainPageFrame.setSize(1200, 600); // Set the size of the frame
 
-            }
-        });
+
         prescriptionClearFieldsButton.addActionListener(new ActionListener() {
-            /**
-             * Invoked when an action occurs.
-             *
-             * @param e the event to be processed
-             */
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Clear all text fields
                 txtPrescriptionID.setText("");
                 txtDatePrescribed.setText("");
                 txtDosage.setText("");
@@ -241,6 +234,30 @@ addPrescriptionButton.addActionListener(new ActionListener() {
                 txtDoctorID.setText("");
                 txtPatientID.setText("");
             }
+        });
+
+
+        prescriptionReturnButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Close the current PrescriptionPage
+                JFrame currentFrame = (JFrame) SwingUtilities.getWindowAncestor(prescriptionPanel);
+                if (currentFrame != null) {
+                    currentFrame.dispose();
+                }
+
+                // Open the MainPage
+                JFrame mainPageFrame = new JFrame("Main Page");
+                mainPageFrame.setContentPane(new MainPage().mainPagePanel);
+                mainPageFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                mainPageFrame.pack();
+                mainPageFrame.setVisible(true);
+                mainPageFrame.setSize(800, 600);
+            }
+        });
+
+        populatePrescriptionTable();
+        PrescriptionTable.addComponentListener(new ComponentAdapter() {
         });
     }
 

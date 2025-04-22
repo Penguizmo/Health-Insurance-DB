@@ -187,4 +187,24 @@ public class VisitDAO {
         }
         return false;
     }
+
+    public int getMostFrequentDoctorID(String patientID) {
+        String sql = "SELECT doctorID, COUNT(*) AS visitCount " +
+                     "FROM Visit WHERE patientID = ? " +
+                     "GROUP BY doctorID " +
+                     "ORDER BY visitCount DESC " +
+                     "LIMIT 1";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, patientID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("doctorID");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1; // Return -1 if no visits are found
+    }
 }

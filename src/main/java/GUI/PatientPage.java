@@ -2,6 +2,9 @@ package GUI;
 
 import DAO.PatientDAO;
 import Models.Patient;
+import DAO.VisitDAO;
+import DAO.DoctorDAO;
+import Models.Doctor;
 import Models.InsuredPatient;
 
 import javax.swing.*;
@@ -33,8 +36,11 @@ public class PatientPage extends JFrame {
     private JButton patientReturnButton;
     private JButton searchPatientsButton;
     private JButton patientClearFieldsButton;
+    private JTextField txtPatientPrimaryDoctor;
 
     private PatientDAO patientDAO = new PatientDAO();
+    private VisitDAO visitDAO = new VisitDAO();
+    private DoctorDAO doctorDAO = new DoctorDAO();
 
     public PatientPage() {
         // Listener for updating a patient
@@ -222,12 +228,34 @@ public class PatientPage extends JFrame {
                 // Clear all text fields
                 txtPatientID.setText("");
                 txtPatientFirstName.setText("");
+                txtPatientPrimaryDoctor.setText("");
                 txtPatientSurname.setText("");
                 txtPatientPostCode.setText("");
                 txtPatientAddress.setText("");
                 txtPatientPhoneNo.setText("");
                 txtPatientEmail.setText("");
                 txtPatientInsuranceID.setText("");
+            }
+        });
+
+        patientTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting() && patientTable.getSelectedRow() != -1) {
+                    int selectedRow = patientTable.getSelectedRow();
+
+                    txtPatientID.setText(patientTable.getValueAt(selectedRow, 0).toString());
+                    txtPatientFirstName.setText(patientTable.getValueAt(selectedRow, 1).toString());
+                    txtPatientSurname.setText(patientTable.getValueAt(selectedRow, 2).toString());
+                    txtPatientPostCode.setText(patientTable.getValueAt(selectedRow, 3).toString());
+                    txtPatientAddress.setText(patientTable.getValueAt(selectedRow, 4).toString());
+                    txtPatientPhoneNo.setText(patientTable.getValueAt(selectedRow, 5).toString());
+                    txtPatientEmail.setText(patientTable.getValueAt(selectedRow, 6).toString());
+                    txtPatientInsuranceID.setText(patientTable.getValueAt(selectedRow, 7) != null ? patientTable.getValueAt(selectedRow, 7).toString() : "");
+
+                    // Update the primary doctor field
+                    updatePrimaryDoctorField();
+                }
             }
         });
     }
@@ -274,5 +302,32 @@ public class PatientPage extends JFrame {
         frame.pack();
         frame.setVisible(true);
         frame.setSize(1200, 600);
+    }
+
+    private void updatePrimaryDoctorField() {
+        try {
+            String patientID = txtPatientID.getText();
+            if (patientID.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Please enter a valid Patient ID.");
+                return;
+            }
+
+            // Get the most frequently visited DoctorID for the given PatientID
+            int primaryDoctorID = visitDAO.getMostFrequentDoctorID(patientID);
+            if (primaryDoctorID == -1) {
+                txtPatientPrimaryDoctor.setText("No visits found");
+                return;
+            }
+
+            // Retrieve the doctor's last name using DoctorDAO
+            Doctor primaryDoctor = doctorDAO.getDoctorById(primaryDoctorID);
+            if (primaryDoctor != null) {
+                txtPatientPrimaryDoctor.setText(primaryDoctor.getSurname());
+            } else {
+                txtPatientPrimaryDoctor.setText("Doctor not found");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error updating primary doctor: " + e.getMessage());
+        }
     }
 }
